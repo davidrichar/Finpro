@@ -32,6 +32,7 @@
   --shadow-md: 0px 8px 16px rgba(0, 0, 0, 0.08);
   /* Sidebar & Layout Defaults (Desktop) */
   --sidebar-width: 260px;
+  --sidebar-bg: var(--bg-secondary);
   --container-max-width: none;
   --content-padding: clamp(1rem, 4vw, 2.5rem);
 
@@ -49,19 +50,8 @@
   }
 }
 
-/* Breakpoint: Tablet Horizontal (769px - 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
-  :root {
-    --sidebar-width: 80px;
-  }
-}
 
 /* Breakpoint: Mobile & Tablet Vertical (<= 768px) */
-@media (max-width: 768px) {
-  :root {
-    --sidebar-width: 0px;
-  }
-}
 
 .dark {
   /* System Tokens - Dark Mode */
@@ -297,25 +287,35 @@ button:disabled {
   padding: var(--space-container);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 0px;
+    --content-padding: 1rem;
+    --space-container: 1rem;
+  }
 
-  /* Global Mobile Resets */
+  /* Global Mobile Full Width & Overflow Control */
   html,
   body {
     overflow-x: hidden !important;
-    height: auto !important;
-    position: relative !important;
     width: 100% !important;
+    max-width: 100vw !important;
     margin: 0 !important;
     padding: 0 !important;
+    height: auto !important;
+    position: relative !important;
   }
 
   .layout-container {
     display: block !important;
     width: 100% !important;
     max-width: 100vw !important;
-    overflow-x: hidden !important;
     margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    background-color: var(--bg) !important;
   }
 
   .main-content {
@@ -324,160 +324,168 @@ button:disabled {
     max-width: 100vw !important;
     padding: 0 0 90px 0 !important;
     overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh !important;
   }
 
   .dashboard-content {
-    padding: var(--space-container) !important;
+    padding: 1rem !important;
     width: 100% !important;
+    max-width: 100vw !important;
     box-sizing: border-box !important;
+    margin: 0 !important;
   }
 
-  /* Components & Layout */
-  .accounts-grid,
-  .mobile-stack {
+  /* Accounts Specific Mobile Utilities */
+  .mobile-compact {
+    padding: 1rem !important;
+    gap: 1rem !important;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .accounts-list-horizontal {
     display: flex !important;
     flex-direction: column !important;
     gap: 0.75rem !important;
     width: 100% !important;
+    overflow-x: hidden !important;
   }
 
-  .mini-summary-row,
-  .entries-summary-row {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 0.75rem !important;
+  .accounts-page-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 1rem 0 90px 0 !important;
+    /* Zero side padding for true edge-to-edge where needed */
+    margin: 0 !important;
+  }
+
+  .accounts-sidebar,
+  .accounts-main {
+    padding: 0 1rem !important;
+    /* Restore padding for inner content so text doesn't touch glass */
     width: 100% !important;
   }
 
-  .mini-card.balance,
-  .entries-summary-card.balance {
+  .mini-mobile-card {
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .accounts-scroll-mobile {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Grid & Stack Resets - Forced Vertical Layout */
+  .accounts-grid,
+  .mobile-stack,
+  .dashboard-grid,
+  .charts-row,
+  .bank-account-grid,
+  .filter-buttons-row,
+  .entries-summary-row,
+  .mini-summary-row,
+  .form-row-double {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 0.75rem !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .mini-card,
+  .entries-summary-card,
+  .bank-card,
+  .statement-card,
+  .summary-card,
+  .btn-add-account {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
     grid-column: span 1 !important;
   }
 
-  .modern-filter-group {
+  /* Lists & Items Layout */
+  .transaction-item,
+  .st-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  .transaction-right,
+  .st-item-right {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: 0.5rem;
+  }
+
+  /* Scrollables & Filters */
+  .modern-filter-group,
+  .period-filters,
+  .receivables-scroll {
     display: flex !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
     padding: 0.5rem 4px !important;
     gap: 0.5rem !important;
-    -webkit-overflow-scrolling: touch;
     width: 100% !important;
     max-width: 100% !important;
-    box-sizing: border-box !important;
-    scrollbar-width: none;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .modern-filter-group::-webkit-scrollbar {
-    display: none;
+  .modern-filter-group::-webkit-scrollbar,
+  .period-filters::-webkit-scrollbar {
+    display: none !important;
   }
 
+  /* Components specific polish */
   .period-filters-container {
     flex-direction: column !important;
     align-items: stretch !important;
     width: 100% !important;
   }
 
-  .period-filters {
-    display: flex !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    padding-bottom: 0.5rem !important;
-    gap: 0.5rem !important;
-    width: 100% !important;
-  }
-
-  /* Visibility Classes */
-  .hide-mobile {
-    display: none !important;
-  }
-
-  .show-mobile {
-    display: block !important;
-  }
-
-  /* Polish tweaks */
   .statement-header {
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 0.75rem !important;
   }
 
-  .statement-controls {
-    width: 100% !important;
-    overflow: hidden !important;
-    min-width: 0 !important;
-  }
-
   .custom-range-picker {
     flex-direction: column !important;
     width: 100% !important;
-  }
-}
-
-/* Responsive Adjustments: Tablet (<= 1024px) */
-@media (max-width: 1024px) {
-  .main-content {
-    margin-left: var(--sidebar-width);
+    padding: 1rem !important;
   }
 
-  .statement-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 1rem !important;
-  }
-
-  .modern-filter-group {
-    display: flex !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    padding: 0.5rem 4px !important;
-    gap: 0.5rem !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  /* Modals - Edge to Edge */
+  .premium-modal-content {
     max-width: 100% !important;
     width: 100% !important;
-    box-sizing: border-box !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
   }
 
-  .modern-filter-group::-webkit-scrollbar {
-    display: none;
+  .premium-modal-body {
+    padding: 1.5rem 1rem !important;
   }
 
-  .mini-summary-row {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  .mini-card.balance,
-  .entries-summary-card.balance {
-    grid-column: span 2;
-  }
-}
-
-/* Responsive Adjustments: Mobile (<= 768px) */
-@media (max-width: 768px) {
-  .main-content {
-    margin-left: 0 !important;
-    padding: 0 0 90px 0 !important;
-  }
-
-  .dashboard-content {
-    padding: var(--space-container);
-  }
-
-  .accounts-grid {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  .mini-summary-row {
-    grid-template-columns: 1fr !important;
-  }
-
-  .mini-card.balance,
-  .entries-summary-card.balance {
-    grid-column: span 1;
-  }
-
+  /* Utilities */
   .hide-mobile {
     display: none !important;
   }
@@ -486,49 +494,11 @@ button:disabled {
     display: block !important;
   }
 
-  .period-filters-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .period-filters {
-    display: flex;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    padding-bottom: 0.5rem;
-    gap: 0.5rem;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .period-filters::-webkit-scrollbar {
-    display: none;
-  }
-
-  .btn-period {
-    flex-shrink: 0;
-  }
-
-  /* Additional Mobile Resets */
-  html,
-  body {
-    overflow-x: hidden !important;
-    height: auto !important;
-  }
-
-  .layout-container {
-    display: block !important;
-    height: auto !important;
-    min-height: 100vh !important;
-    overflow: visible !important;
-  }
-
-  .main-content {
-    height: auto !important;
-    min-height: 100vh !important;
-    overflow: visible !important;
-    margin-left: 0 !important;
+  .flex-mobile-column {
+    flex-direction: column !important;
   }
 }
+
 
 .spinner {
   width: 18px;
@@ -862,28 +832,6 @@ button:disabled {
   color: var(--text-main);
 }
 
-@media (max-width: 768px) {
-  .premium-modal-content {
-    max-width: 100% !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-  }
-
-  .premium-modal-body {
-    padding: 1.5rem 1rem !important;
-  }
-
-  .form-row-double {
-    flex-direction: column !important;
-    gap: 1.25rem !important;
-  }
-
-  .bank-account-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
 
 
 .summary-card {
@@ -1539,37 +1487,6 @@ button:disabled {
   }
 }
 
-@media (max-width: 768px) {
-  .filter-buttons-row {
-    grid-template-columns: 1fr;
-  }
-
-  .period-filters-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .period-filters {
-    justify-content: center;
-  }
-
-  .btn-filter-amount {
-    font-size: 1.5rem;
-  }
-
-  .transaction-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .transaction-right {
-    width: 100%;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
 
 /* ============================================ */
 /* PREMIUM TRANSACTION MODAL STYLES */
@@ -2710,12 +2627,6 @@ body:has(.accounts-page-container) {
   color: var(--error);
 }
 
-@media (max-width: 768px) {
-  .entries-summary-row {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
 
 /* Sophisticated Reports Page */
 .reports-page-container {

@@ -326,7 +326,7 @@ export default function Sidebar() {
           color: var(--primary);
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
           .mobile-toggle, .sidebar-overlay, .sidebar {
             display: none !important;
           }
