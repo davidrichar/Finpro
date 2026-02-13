@@ -118,6 +118,7 @@ export default function Accounts() {
                     )
                 `)
                 .eq('account_id', selectedAccountId)
+                .eq('status', 'paid')
                 .gte('date', startDate)
                 .lte('date', endDate)
                 .order('date', { ascending: false });

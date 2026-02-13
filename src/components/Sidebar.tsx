@@ -81,20 +81,21 @@ export default function Sidebar() {
       </aside>
 
       <nav className="bottom-nav">
-        {menuItems.slice(0, 3).map((item) => (
+        {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }: { isActive: boolean }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
           >
             <item.icon size={22} />
-            <span>{item.name === 'Contas Bancárias' ? 'Contas' : item.name === 'Relatórios' ? 'Relat.' : item.name}</span>
+            <span>
+              {item.name === 'Contas Bancárias' ? 'Contas' :
+                item.name === 'Relatórios' ? 'Relat.' :
+                  item.name === 'Configurações' ? 'Config.' :
+                    item.name}
+            </span>
           </NavLink>
         ))}
-        <button className="bottom-nav-item" onClick={toggleSidebar}>
-          <Menu size={22} />
-          <span>Mais</span>
-        </button>
       </nav>
 
       <style>{`
@@ -104,8 +105,8 @@ export default function Sidebar() {
           left: 0;
           bottom: 0;
           width: var(--sidebar-width);
-          background: #ffffff;
-          border-right: 1px solid rgba(16, 185, 129, 0.1);
+          background: var(--sidebar-bg);
+          border-right: 1px solid var(--border);
           display: flex;
           flex-direction: column;
           z-index: 1000;
@@ -151,18 +152,18 @@ export default function Sidebar() {
         }
 
         .nav-item:hover {
-          background: rgba(16, 185, 129, 0.05);
+          background: rgba(0, 230, 118, 0.05);
           color: var(--primary);
         }
 
         .nav-item.active {
-          background: rgba(16, 185, 129, 0.1);
+          background: rgba(0, 230, 118, 0.1);
           color: var(--primary);
         }
 
         .sidebar-footer {
           padding: 1.5rem;
-          border-top: 1px solid #f1f5f9;
+          border-top: 1px solid var(--border);
         }
 
         .user-profile {
@@ -211,8 +212,8 @@ export default function Sidebar() {
         .logout-button {
           width: 100%;
           padding: 0.75rem;
-          background: #fef2f2;
-          color: #ef4444;
+          background: rgba(239, 68, 68, 0.1);
+          color: var(--error);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -226,7 +227,7 @@ export default function Sidebar() {
         }
 
         .logout-button:hover {
-          background: #fee2e2;
+          background: rgba(239, 68, 68, 0.15);
         }
 
         .mobile-toggle {
@@ -235,13 +236,13 @@ export default function Sidebar() {
           top: 1rem;
           left: 1rem;
           z-index: 1100;
-          background: white;
-          border: 1px solid #e2e8f0;
+          background: var(--card);
+          border: 1px solid var(--border);
           border-radius: 8px;
           padding: 0.5rem;
           color: var(--text-main);
           cursor: pointer;
-          box-shadow: var(--shadow);
+          box-shadow: var(--shadow-sm);
         }
 
         /* Bottom Nav Styles */
@@ -250,14 +251,15 @@ export default function Sidebar() {
           position: fixed;
           bottom: 0;
           left: 0;
-          right: 0;
-          background: white;
-          border-top: 1px solid #F1F5F9;
-          display: none;
-          grid-template-columns: repeat(5, 1fr);
-          padding: 0.5rem 0.25rem 1.25rem 0.25rem;
+          width: 100%;
+          height: 70px;
+          background: var(--bg-secondary);
+          justify-content: space-around;
+          align-items: center;
+          border-top: 1px solid rgba(255,255,255,0.05);
           z-index: 1001;
-          box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+          padding-bottom: env(safe-area-inset-bottom);
+          box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .bottom-nav-item {
@@ -265,7 +267,7 @@ export default function Sidebar() {
           flex-direction: column;
           align-items: center;
           gap: 0.25rem;
-          color: #94A3B8;
+          color: var(--text-muted);
           text-decoration: none;
           background: transparent;
           border: none;
@@ -283,34 +285,13 @@ export default function Sidebar() {
         }
 
         @media (max-width: 768px) {
-          .mobile-toggle {
-            display: none; /* Hidden, using Bottom Nav "Mais" */
+          .mobile-toggle, .sidebar-overlay, .sidebar {
+            display: none !important;
           }
 
           .bottom-nav {
-            display: grid;
-          }
-
-          .sidebar {
-            transform: translateX(-100%);
-            width: 85%;
-            max-width: 300px;
-            box-shadow: 10px 0 20px rgba(0,0,0,0.1);
-          }
-
-          .sidebar.open {
-            transform: translateX(0);
-          }
-
-          .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(2px);
-            z-index: 999;
+            display: flex;
+            justify-content: space-around;
           }
         }
       `}</style>

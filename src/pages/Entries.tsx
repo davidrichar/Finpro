@@ -322,8 +322,7 @@ export default function Entries() {
                                     <div
                                         className={`transaction-icon ${transaction.type}`}
                                         style={{
-                                            backgroundColor: transaction.categories?.color || '#e2e8f0',
-                                            color: '#fff'
+                                            backgroundColor: transaction.categories?.color || 'var(--border)',
                                         }}
                                     >
                                         {transaction.type === 'income' ?

@@ -60,7 +60,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccou
             <div className="modal-content" style={{ maxWidth: '450px' }}>
                 <div className="modal-header">
                     <h2>Nova Conta Bancária</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                    <button onClick={onClose} className="btn-close-modal">
                         <X size={24} />
                     </button>
                 </div>
@@ -110,7 +110,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccou
                                     onClick={() => setFormData({ ...formData, type: item.id })}
                                     className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${formData.type === item.id
                                         ? 'bg-success text-white shadow-lg'
-                                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                        : 'bg-secondary-theme text-muted-theme hover:bg-border-theme'
                                         }`}
                                 >
                                     <item.icon size={20} />

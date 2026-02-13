@@ -6,12 +6,14 @@ import Accounts from './pages/Accounts';
 import Transfers from './pages/Transfers';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
+import PrintReport from './pages/PrintReport';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { type ReactNode } from 'react';
 import Layout from './components/Layout';
 import { ToastProvider } from './contexts/ToastContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
-const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+const ProtectedRoute = ({ children, showLayout = true }: { children: ReactNode, showLayout?: boolean }) => {
   const { session, loading } = useAuth();
 
   if (loading) return <div className="layout-container" style={{ justifyContent: 'center', alignItems: 'center' }}>Loading...</div>;
@@ -20,68 +22,82 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <Layout>{children}</Layout>;
+  if (showLayout) {
+    return <Layout>{children}</Layout>;
+  }
+
+  return <>{children}</>;
 };
 
 function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Navigate to="/entries" replace />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/entries"
-              element={
-                <ProtectedRoute>
-                  <Entries />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/accounts"
-              element={
-                <ProtectedRoute>
-                  <Accounts />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/transfers"
-              element={
-                <ProtectedRoute>
-                  <Transfers />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute>
-                  <Reports />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </ToastProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Navigate to="/entries" replace />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/entries"
+                element={
+                  <ProtectedRoute>
+                    <Entries />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/accounts"
+                element={
+                  <ProtectedRoute>
+                    <Accounts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transfers"
+                element={
+                  <ProtectedRoute>
+                    <Transfers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <Reports />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/print-report"
+                element={
+                  <ProtectedRoute showLayout={false}>
+                    <PrintReport />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Router>
+        </ToastProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

@@ -32,7 +32,7 @@ export default function TransactionModal({ isOpen, onClose, type }: TransactionM
             <div className="modal-content">
                 <div className="modal-header">
                     <h3>{title}</h3>
-                    <button onClick={onClose} style={{ background: 'none', color: '#64748b', width: 'auto', padding: '4px' }}>
+                    <button onClick={onClose} className="btn-close-modal">
                         <X size={20} />
                     </button>
                 </div>
@@ -65,7 +65,8 @@ export default function TransactionModal({ isOpen, onClose, type }: TransactionM
                             <select
                                 value={categoriaId}
                                 onChange={(e) => setCategoriaId(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1.5px solid #e2e8f0' }}
+                                className="premium-select"
+                                style={{ width: '100%' }}
                             >
                                 <option value="">Selecione uma categoria</option>
                                 <option value="Salário">Salário</option>

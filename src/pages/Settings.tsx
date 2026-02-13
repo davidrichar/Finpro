@@ -16,12 +16,14 @@ import {
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Section = 'Perfil' | 'Contas Bancárias' | 'Categorias' | 'Notificações' | 'Segurança' | 'Aparência' | 'Preferências do Sistema';
 
 export default function Settings() {
     const { user } = useAuth();
     const { showToast } = useToast();
+    const { theme, setTheme } = useTheme();
     const [activeSection, setActiveSection] = useState<Section>('Perfil');
     const [loading, setLoading] = useState(false);
 
@@ -268,23 +270,33 @@ export default function Settings() {
                 );
 
             case 'Aparência':
+                const themes: { id: 'light' | 'dark' | 'system'; name: string; class: string }[] = [
+                    { id: 'light', name: 'Claro', class: 'light-preview' },
+                    { id: 'dark', name: 'Escuro', class: 'dark-preview' },
+                    { id: 'system', name: 'Automático', class: 'system-preview' },
+                ];
+
                 return (
                     <div className="settings-section">
                         <h2 className="settings-section-title">Customização Visual</h2>
                         <div className="transfer-label" style={{ marginBottom: '1rem' }}>Tema do Sistema</div>
                         <div className="appearance-grid">
-                            <div className="appearance-card active">
-                                <div className="visual-preview light"></div>
-                                <span>Claro</span>
-                            </div>
-                            <div className="appearance-card">
-                                <div className="visual-preview dark"></div>
-                                <span>Escuro</span>
-                            </div>
-                            <div className="appearance-card">
-                                <div className="visual-preview auto"></div>
-                                <span>Automático</span>
-                            </div>
+                            {themes.map((t) => (
+                                <div
+                                    key={t.id}
+                                    className={`appearance-card ${theme === t.id ? 'active' : ''}`}
+                                    onClick={() => setTheme(t.id)}
+                                >
+                                    <div className={`visual-preview ${t.class}`}>
+                                        <div className="preview-header"></div>
+                                        <div className="preview-body">
+                                            <div className="preview-line"></div>
+                                            <div className="preview-line short"></div>
+                                        </div>
+                                    </div>
+                                    <span>{t.name}</span>
+                                </div>
+                            ))}
                         </div>
 
                         <div className="transfer-label" style={{ marginTop: '2.5rem', marginBottom: '1rem' }}>Formato de Data</div>
