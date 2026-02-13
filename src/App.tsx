@@ -1,7 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
 import Entries from './pages/Entries';
 import Accounts from './pages/Accounts';
 import Transfers from './pages/Transfers';
@@ -35,7 +34,7 @@ function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Navigate to="/entries" replace />
                 </ProtectedRoute>
               }
             />

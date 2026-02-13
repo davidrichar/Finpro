@@ -92,6 +92,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccou
                         <label>Saldo Inicial (R$)</label>
                         <input
                             type="text"
+                            inputMode="decimal"
                             required
                             placeholder="0,00"
                             value={formData.balance}
@@ -108,8 +109,8 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccou
                                     type="button"
                                     onClick={() => setFormData({ ...formData, type: item.id })}
                                     className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${formData.type === item.id
-                                            ? 'bg-success text-white shadow-lg'
-                                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                        ? 'bg-success text-white shadow-lg'
+                                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                                         }`}
                                 >
                                     <item.icon size={20} />

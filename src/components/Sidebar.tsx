@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard,
   Repeat,
   Settings,
   LogOut,
@@ -15,9 +14,8 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const menuItems = [
-  { path: '/', name: 'Dashboard', icon: LayoutDashboard },
-  { path: '/accounts', name: 'Contas Bancárias', icon: Wallet },
   { path: '/entries', name: 'Lançamento', icon: PlusCircle },
+  { path: '/accounts', name: 'Contas Bancárias', icon: Wallet },
   { path: '/reports', name: 'Relatórios', icon: FileText },
   { path: '/transfers', name: 'Transferências', icon: Repeat },
   { path: '/settings', name: 'Configurações', icon: Settings },
@@ -81,6 +79,23 @@ export default function Sidebar() {
           </button>
         </div>
       </aside>
+
+      <nav className="bottom-nav">
+        {menuItems.slice(0, 3).map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }: { isActive: boolean }) => `bottom-nav-item ${isActive ? 'active' : ''}`}
+          >
+            <item.icon size={22} />
+            <span>{item.name === 'Contas Bancárias' ? 'Contas' : item.name === 'Relatórios' ? 'Relat.' : item.name}</span>
+          </NavLink>
+        ))}
+        <button className="bottom-nav-item" onClick={toggleSidebar}>
+          <Menu size={22} />
+          <span>Mais</span>
+        </button>
+      </nav>
 
       <style>{`
         .sidebar {
@@ -229,13 +244,58 @@ export default function Sidebar() {
           box-shadow: var(--shadow);
         }
 
+        /* Bottom Nav Styles */
+        .bottom-nav {
+          display: none;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: white;
+          border-top: 1px solid #F1F5F9;
+          display: none;
+          grid-template-columns: repeat(5, 1fr);
+          padding: 0.5rem 0.25rem 1.25rem 0.25rem;
+          z-index: 1001;
+          box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .bottom-nav-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.25rem;
+          color: #94A3B8;
+          text-decoration: none;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .bottom-nav-item span {
+          font-size: 0.625rem;
+          font-weight: 600;
+        }
+
+        .bottom-nav-item.active {
+          color: var(--primary);
+        }
+
         @media (max-width: 768px) {
           .mobile-toggle {
-            display: block;
+            display: none; /* Hidden, using Bottom Nav "Mais" */
+          }
+
+          .bottom-nav {
+            display: grid;
           }
 
           .sidebar {
             transform: translateX(-100%);
+            width: 85%;
+            max-width: 300px;
+            box-shadow: 10px 0 20px rgba(0,0,0,0.1);
           }
 
           .sidebar.open {

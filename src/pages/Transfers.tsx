@@ -225,7 +225,7 @@ export default function Transfers() {
                         </div>
                     </div>
 
-                    <div className="transfer-form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                    <div className="transfer-form-group mobile-stack-form" style={{ marginTop: '1rem' }}>
                         <div>
                             <label className="transfer-label">Data</label>
                             <input

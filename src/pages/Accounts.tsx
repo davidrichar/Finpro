@@ -217,45 +217,47 @@ export default function Accounts() {
     };
 
     return (
-        <div className="accounts-page-container">
-            <div className="accounts-grid">
+        <div className="accounts-page-container dashboard-content mobile-compact">
+            <div className="accounts-grid mobile-stack">
                 {/* Sidebar Column */}
-                <aside className="accounts-sidebar">
-                    <button className="btn-add-account" onClick={() => setIsModalOpen(true)}>
+                <aside className="accounts-sidebar mobile-full-width">
+                    <button className="btn-add-account w-full mb-4" onClick={() => setIsModalOpen(true)}>
                         <PlusCircle size={24} />
                         Adicionar conta
                     </button>
 
-                    <div className="sidebar-card">
-                        <span className="sidebar-title">Minhas Contas</span>
-                        {loading ? (
-                            <div className="flex justify-center p-4"><span className="spinner w-6 h-6 border-2"></span></div>
-                        ) : bankAccounts.length === 0 ? (
-                            <div className="p-4 text-center text-gray-400 text-[10px] italic">Nenhuma conta cadastrada.</div>
-                        ) : (
-                            bankAccounts.map((acc: BankAccount) => {
-                                const IconComp = iconMap[acc.type] || Landmark;
-                                return (
-                                    <div
-                                        key={acc.id}
-                                        className={`bank-card ${selectedAccountId === acc.id ? 'active' : ''}`}
-                                        onClick={() => setSelectedAccountId(acc.id)}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <div className="bank-info">
-                                            <div className="bank-icon-box">
-                                                <IconComp size={20} />
+                    <div className="sidebar-card accounts-scroll-mobile">
+                        <span className="sidebar-title hide-mobile">Minhas Contas</span>
+                        <div className="accounts-list-horizontal">
+                            {loading ? (
+                                <div className="flex justify-center p-4"><span className="spinner w-6 h-6 border-2"></span></div>
+                            ) : bankAccounts.length === 0 ? (
+                                <div className="p-4 text-center text-gray-400 text-[10px] italic">Nenhuma conta cadastrada.</div>
+                            ) : (
+                                bankAccounts.map((acc: BankAccount) => {
+                                    const IconComp = iconMap[acc.type] || Landmark;
+                                    return (
+                                        <div
+                                            key={acc.id}
+                                            className={`bank-card mini-mobile-card ${selectedAccountId === acc.id ? 'active' : ''}`}
+                                            onClick={() => setSelectedAccountId(acc.id)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <div className="bank-info">
+                                                <div className="bank-icon-box">
+                                                    <IconComp size={20} />
+                                                </div>
+                                                <div className="bank-details">
+                                                    <span className="name">{acc.name}</span>
+                                                    <span className="type hide-mobile text-[10px]">{acc.bank_name}</span>
+                                                </div>
                                             </div>
-                                            <div className="bank-details">
-                                                <span className="name">{acc.name}</span>
-                                                <span className="type">{acc.bank_name}</span>
-                                            </div>
+                                            <span className="bank-balance">{formatCurrency(acc.balance)}</span>
                                         </div>
-                                        <span className="bank-balance">{formatCurrency(acc.balance)}</span>
-                                    </div>
-                                );
-                            })
-                        )}
+                                    );
+                                })
+                            )}
+                        </div>
                     </div>
                 </aside>
 

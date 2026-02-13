@@ -208,17 +208,17 @@ export default function Entries() {
     };
 
     return (
-        <div className="dashboard-content">
+        <div className="dashboard-content mobile-compact">
             {/* Header */}
-            <div className="entries-header">
-                <div>
-                    <h1>Lançamentos</h1>
+            <div className="entries-header flex-mobile-column">
+                <div className="mb-4 md:mb-0">
+                    <h1 className="text-xl md:text-2xl">Lançamentos</h1>
                     <p className="subtitle">Gerencie suas contas a receber e a pagar</p>
                 </div>
             </div>
 
             {/* Filter Buttons - Contas a Receber / Contas a Pagar */}
-            <div className="filter-buttons-row">
+            <div className="filter-buttons-row mobile-stack">
                 <button
                     className={`btn-filter-type receivable ${filterType === 'income' ? 'active' : ''}`}
                     onClick={() => {
@@ -246,18 +246,18 @@ export default function Entries() {
             </div>
 
             {/* Quick Summary Row */}
-            <div className="entries-summary-row">
+            <div className="entries-summary-row mobile-grid">
                 <div className="entries-summary-card receivable">
-                    <span className="summary-label">A Receber (Total)</span>
-                    <span className="summary-amount">{formatCurrency(totalReceivable)}</span>
+                    <span className="summary-label">A Receber</span>
+                    <span className="summary-amount text-sm md:text-base">{formatCurrency(totalReceivable)}</span>
                 </div>
                 <div className="entries-summary-card payable">
-                    <span className="summary-label">A Pagar (Total)</span>
-                    <span className="summary-amount">{formatCurrency(totalPayable)}</span>
+                    <span className="summary-label">A Pagar</span>
+                    <span className="summary-amount text-sm md:text-base">{formatCurrency(totalPayable)}</span>
                 </div>
-                <div className={`entries-summary-card balance ${balance >= 0 ? 'positive' : 'negative'}`}>
-                    <span className="summary-label">Balanço (Previsão)</span>
-                    <span className="summary-amount">{formatCurrency(balance)}</span>
+                <div className={`entries-summary-card balance ${balance >= 0 ? 'positive' : 'negative'} hide-mobile-sm`}>
+                    <span className="summary-label">Previsão</span>
+                    <span className="summary-amount text-sm md:text-base">{formatCurrency(balance)}</span>
                 </div>
             </div>
 

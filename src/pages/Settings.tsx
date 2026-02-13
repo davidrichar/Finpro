@@ -331,9 +331,9 @@ export default function Settings() {
         <div className="settings-page-container">
             {renderSidebar()}
             <main className="settings-main">
-                <header className="settings-header">
-                    <h1>Configurações</h1>
-                    <p>Gerencie preferências, contas e personalizações do sistema.</p>
+                <header className="settings-header" style={{ marginBottom: '2rem' }}>
+                    <h1 className="text-xl md:text-2xl">Configurações</h1>
+                    <p className="text-sm md:text-base">Gerencie preferências, contas e personalizações do sistema.</p>
                 </header>
                 {renderContent()}
             </main>

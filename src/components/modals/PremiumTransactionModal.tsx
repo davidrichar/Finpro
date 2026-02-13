@@ -394,6 +394,7 @@ export default function PremiumTransactionModal({ isOpen, onClose, onSuccess, ty
                         <DollarSign size={20} className="field-icon" />
                         <input
                             type="text"
+                            inputMode="decimal"
                             placeholder="0,00"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}

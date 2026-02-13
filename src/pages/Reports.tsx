@@ -100,7 +100,7 @@ export default function Reports() {
 
     return (
         <div className="reports-page-container">
-            <header className="reports-header">
+            <header className="reports-header senior-polish">
                 <div className="reports-title-container">
                     <h1 className="reports-title">
                         Relatórios
@@ -108,15 +108,15 @@ export default function Reports() {
                     </h1>
                 </div>
 
-                <div className="reports-actions">
-                    <div className="reports-month-selector" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="reports-actions-row">
+                    <div className="reports-month-selector">
                         <button className="icon-action-btn" onClick={() => {
                             setSelectedMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
                             setUseCustomRange(false);
                         }}>
                             <ChevronLeft size={18} />
                         </button>
-                        <span style={{ fontSize: '0.875rem', fontWeight: 700, minWidth: '120px', textAlign: 'center' }}>
+                        <span className="selected-period-label">
                             {monthNames[selectedMonth.getMonth()]} {selectedMonth.getFullYear()}
                         </span>
                         <button className="icon-action-btn" onClick={() => {
@@ -127,15 +127,17 @@ export default function Reports() {
                         </button>
                     </div>
 
-                    <button className="reports-control-btn" onClick={() => setUseCustomRange(!useCustomRange)}>
-                        <Calendar size={18} />
-                        Personalizado
-                    </button>
+                    <div className="reports-button-group">
+                        <button className="reports-control-btn" onClick={() => setUseCustomRange(!useCustomRange)}>
+                            <Calendar size={18} />
+                            <span>Personalizado</span>
+                        </button>
 
-                    <button className="reports-btn-export" onClick={handleExport}>
-                        <Download size={18} />
-                        Exportar Relatório
-                    </button>
+                        <button className="reports-btn-export" onClick={handleExport}>
+                            <Download size={18} />
+                            <span>Exportar</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -155,14 +157,13 @@ export default function Reports() {
             <section className="report-section">
                 <h2 className="section-num-title">01. DESPESAS</h2>
 
-                <div className="report-list">
+                <div className="report-list elegant-cards">
                     {expenseGroups.length === 0 ? (
-                        <p className="text-gray-400 italic">Nenhuma despesa registrada.</p>
+                        <p className="empty-state-text">Nenhuma despesa registrada.</p>
                     ) : (
                         expenseGroups.map((group, idx) => (
-                            <div key={idx} className="report-item">
+                            <div key={idx} className="report-card-item expense">
                                 <span className="item-label">{group.categoryName}</span>
-                                <div className="item-dots"></div>
                                 <span className="item-value">{formatCurrency(group.total)}</span>
                             </div>
                         ))
@@ -178,14 +179,13 @@ export default function Reports() {
             <section className="report-section">
                 <h2 className="section-num-title">02. RECEITAS</h2>
 
-                <div className="report-list">
+                <div className="report-list elegant-cards">
                     {incomeGroups.length === 0 ? (
-                        <p className="text-gray-400 italic">Nenhuma receita registrada.</p>
+                        <p className="empty-state-text">Nenhuma receita registrada.</p>
                     ) : (
                         incomeGroups.map((group, idx) => (
-                            <div key={idx} className="report-item">
+                            <div key={idx} className="report-card-item income">
                                 <span className="item-label">{group.categoryName}</span>
-                                <div className="item-dots"></div>
                                 <span className="item-value">{formatCurrency(group.total)}</span>
                             </div>
                         ))
