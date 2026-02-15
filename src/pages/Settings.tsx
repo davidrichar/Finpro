@@ -12,7 +12,8 @@ import {
     Plus,
     Lock,
     Globe,
-    X
+    X,
+    Menu
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -254,33 +255,6 @@ export default function Settings() {
         }, 800);
     };
 
-    const renderSidebar = () => {
-        const items: { name: Section; icon: any }[] = [
-            { name: 'Perfil', icon: User },
-            { name: 'Contas Bancárias', icon: Landmark },
-            { name: 'Categorias', icon: Tag },
-            { name: 'Notificações', icon: Bell },
-            { name: 'Segurança', icon: Shield },
-            { name: 'Aparência', icon: Palette },
-            { name: 'Preferências do Sistema', icon: SettingsIcon },
-        ];
-
-        return (
-            <aside className="settings-sidebar">
-                {items.map((item) => (
-                    <button
-                        key={item.name}
-                        className={`settings-nav-item ${activeSection === item.name ? 'active' : ''}`}
-                        onClick={() => setActiveSection(item.name)}
-                    >
-                        <item.icon size={18} />
-                        {item.name}
-                    </button>
-                ))}
-            </aside>
-        );
-    };
-
     const renderContent = () => {
         switch (activeSection) {
             case 'Perfil':
@@ -359,7 +333,7 @@ export default function Settings() {
                 const expenseCats = categories.filter(c => c.type === 'expense');
                 return (
                     <div className="settings-section">
-                        <div className="flex justify-between items-center mb-6">
+                        <div className="categories-header flex justify-between items-center mb-6">
                             <h2 className="settings-section-title" style={{ margin: 0 }}>Gestão de Categorias</h2>
                             <button className="btn-add-minimal" onClick={() => openCategoryModal()}>
                                 <Plus size={18} /> Nova Categoria
@@ -704,13 +678,69 @@ export default function Settings() {
         }
     };
 
+    const menuItems = [
+        { id: 'Perfil' as Section, label: 'Perfil', icon: <User size={18} /> },
+        { id: 'Contas Bancárias' as Section, label: 'Contas Bancárias', icon: <Landmark size={18} /> },
+        { id: 'Categorias' as Section, label: 'Categorias', icon: <Tag size={18} /> },
+        { id: 'Notificações' as Section, label: 'Notificações', icon: <Bell size={18} /> },
+        { id: 'Segurança' as Section, label: 'Segurança', icon: <Shield size={18} /> },
+        { id: 'Aparência' as Section, label: 'Aparência', icon: <Palette size={18} /> },
+        { id: 'Preferências do Sistema' as Section, label: 'Preferências do Sistema', icon: <SettingsIcon size={18} /> },
+    ];
+
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Close mobile menu when a section is selected
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+    }, [activeSection]);
+
+    const renderSidebar = () => (
+        <>
+            {/* Mobile Overlay */}
+            <div
+                className={`settings-sidebar-overlay ${isMobileMenuOpen ? 'open' : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            <aside className={`settings-sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
+                <div className="sidebar-header-mobile">
+                    <h3>Menu</h3>
+                    <button className="btn-close-sidebar" onClick={() => setIsMobileMenuOpen(false)}>
+                        <X size={20} />
+                    </button>
+                </div>
+                {menuItems.map((item) => (
+                    <button
+                        key={item.id}
+                        className={`settings-nav-item ${activeSection === item.id ? 'active' : ''}`}
+                        onClick={() => setActiveSection(item.id)}
+                    >
+                        {item.icon}
+                        <span>{item.label}</span>
+                    </button>
+                ))}
+            </aside>
+        </>
+    );
+
     return (
         <div className="settings-page-container">
             {renderSidebar()}
             <main className="settings-main">
                 <header className="settings-header" style={{ marginBottom: '2rem' }}>
-                    <h1 className="text-xl md:text-2xl">Configurações</h1>
-                    <p className="text-sm md:text-base">Gerencie preferências, contas e personalizações do sistema.</p>
+                    <div className="flex items-center gap-3">
+                        <button
+                            className="btn-mobile-menu-toggle md:hidden"
+                            onClick={() => setIsMobileMenuOpen(true)}
+                        >
+                            <Menu size={24} />
+                        </button>
+                        <div>
+                            <h1 className="text-xl md:text-2xl">Configurações</h1>
+                            <p className="text-sm md:text-base">Gerencie preferências, contas e personalizações do sistema.</p>
+                        </div>
+                    </div>
                 </header>
                 {renderContent()}
             </main>

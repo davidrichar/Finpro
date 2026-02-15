@@ -3859,3 +3859,290 @@ input:checked+.slider:before {
     height: 44px;
   }
 }
+
+/* ========================================
+   SETTINGS PAGE LAYOUT (DESKTOP & GLOBAL)
+   ======================================== */
+
+.settings-page-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bg);
+}
+
+.settings-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--bg-secondary);
+}
+
+.settings-main {
+  flex: 1;
+  padding: 2rem 3rem;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.settings-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-weight: 500;
+  background: transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.settings-nav-item:hover {
+  background: var(--bg-tertiary, #f8fafc);
+  color: var(--text-main);
+}
+
+.settings-nav-item.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* Categories Header Desktop */
+.categories-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-mobile-menu-toggle {
+  display: none;
+}
+
+.sidebar-header-mobile {
+  display: none;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN ADAPTATIONS
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .settings-main {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* Hide Sidebar & Stack Layout */
+  .settings-sidebar {
+    display: none;
+  }
+
+  .settings-page-container {
+    flex-direction: column;
+  }
+
+  .settings-main {
+    padding: 24px 20px;
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Header Typography */
+  .settings-header {
+    margin-bottom: 24px !important;
+  }
+
+  .settings-header h1 {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  .settings-header p {
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  /* Categories Header - Mobile Column */
+  .categories-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px !important;
+  }
+
+  .categories-header .btn-add-minimal {
+    align-self: flex-end;
+    width: auto;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 8px;
+  }
+
+  /* Section Spacing */
+  .settings-section {
+    margin-bottom: 32px;
+  }
+
+  /* Categories List Items */
+  .settings-list {
+    gap: 14px;
+  }
+
+  .settings-list-item {
+    padding: 16px;
+    border-radius: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .item-main-info {
+    width: 100%;
+  }
+
+  .item-actions-minimal {
+    justify-content: flex-end;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 4px;
+  }
+
+  /* Mobile Sidebar Logic */
+  .settings-sidebar {
+    display: flex;
+    /* Override display: none when specific logic applies, but wait, usually we want it hidden */
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    /* Restore flex display */
+    border-right: none;
+  }
+
+  /* Only hide if NOT open (override) - actually better to toggle class */
+  .settings-sidebar:not(.open) {
+    display: none;
+    /* Keep hidden by default */
+  }
+
+  .settings-sidebar.open {
+    display: flex;
+    transform: translateX(0);
+  }
+
+  /* Overlay */
+  .settings-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    backdrop-filter: blur(2px);
+  }
+
+  .settings-sidebar-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Mobile Sidebar Header */
+  .sidebar-header-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-header-mobile h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+  }
+
+  .btn-close-sidebar {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  /* Toggle Button */
+  .btn-mobile-menu-toggle {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: -8px;
+    /* Alignment tweak */
+  }
+
+  /* Appearance Grid */
+  .appearance-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* Small Mobile Optimizations (< 480px) */
+@media (max-width: 480px) {
+  .settings-main {
+    padding: 20px 16px;
+  }
+
+  .categories-header .btn-add-minimal {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .appearance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-header h1 {
+    font-size: 20px;
+  }
+
+  .item-name {
+    font-size: 0.9rem;
+  }
+
+  /* Modal Full Width on Small Screens */
+  .category-modal-content {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0;
+    bottom: 0;
+    border-radius: 16px 16px 0 0;
+  }
+}
