@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Landmark, Wallet, PiggyBank, CreditCard } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { parseCurrency } from '../../lib/utils';
 
 interface AddAccountModalProps {
     isOpen: boolean;
@@ -40,7 +41,7 @@ export default function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccou
                     user_id: user.id,
                     name: formData.name,
                     bank_name: formData.bank_name,
-                    balance: parseFloat(formData.balance.replace(',', '.')) || 0,
+                    balance: parseCurrency(formData.balance),
                     type: formData.type
                 }]);
 

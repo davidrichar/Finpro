@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { parseCurrency } from '../../lib/utils';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -79,7 +80,7 @@ export default function TransactionModal({ isOpen, onClose, type }: TransactionM
                             <div className="form-group">
                                 <label>Valor</label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     placeholder="0,00"
                                     value={valor}
                                     onChange={(e) => setValor(e.target.value)}
@@ -151,7 +152,7 @@ export default function TransactionModal({ isOpen, onClose, type }: TransactionM
                                     user_id: user.id,
                                     nome,
                                     descricao,
-                                    valor: parseFloat(valor),
+                                    valor: parseCurrency(valor),
                                     tipo: type === 'receivable' ? 'receita' : 'despesa',
                                     origem: type === 'receivable' ? 'conta_receber' : 'conta_pagar',
                                     status: 'pendente',

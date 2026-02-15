@@ -13,6 +13,7 @@ import {
     Landmark
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { parseCurrency } from '../../lib/utils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -138,10 +139,7 @@ export default function PremiumTransactionModal({ isOpen, onClose, onSuccess, ty
     };
 
     const parseAmount = (val: string) => {
-        if (!val) return 0;
-        // Remove R$, currency symbols, and spaces. Replace comma with dot.
-        const cleanVal = val.replace(/[^\d.,-]/g, '').replace(',', '.');
-        return parseFloat(cleanVal) || 0;
+        return parseCurrency(val);
     };
 
     const calculateInstallments = () => {
@@ -314,7 +312,7 @@ export default function PremiumTransactionModal({ isOpen, onClose, onSuccess, ty
     if (!isOpen) return null;
 
     const installmentsList = calculateInstallments();
-    const totalAmount = parseFloat(amount.replace(',', '.')) || 0;
+    const totalAmount = parseCurrency(amount);
 
     return (
         <div className="premium-modal-overlay" onClick={handleClose}>
