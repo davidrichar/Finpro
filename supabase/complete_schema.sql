@@ -70,6 +70,21 @@ DROP POLICY IF EXISTS "Usuários podem ver todas as categorias" ON categories;
 CREATE POLICY "Usuários podem ver todas as categorias" ON categories
   FOR SELECT USING (true);
 
+-- Usuários autenticados podem inserir categorias
+DROP POLICY IF EXISTS "Usuários podem inserir categorias" ON categories;
+CREATE POLICY "Usuários podem inserir categorias" ON categories
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Usuários autenticados podem atualizar categorias
+DROP POLICY IF EXISTS "Usuários podem atualizar categorias" ON categories;
+CREATE POLICY "Usuários podem atualizar categorias" ON categories
+  FOR UPDATE USING (auth.role() = 'authenticated');
+
+-- Usuários autenticados podem deletar categorias
+DROP POLICY IF EXISTS "Usuários podem deletar categorias" ON categories;
+CREATE POLICY "Usuários podem deletar categorias" ON categories
+  FOR DELETE USING (auth.role() = 'authenticated');
+
 -- ============================================
 -- POLÍTICAS DE SEGURANÇA - BANK_ACCOUNTS
 -- ============================================

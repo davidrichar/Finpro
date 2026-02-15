@@ -11,7 +11,8 @@ import {
     Trash2,
     Plus,
     Lock,
-    Globe
+    Globe,
+    X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -39,6 +40,24 @@ export default function Settings() {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
 
+    // Category CRUD State
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [editingCategory, setEditingCategory] = useState<any>(null);
+    const [categoryForm, setCategoryForm] = useState({
+        name: '',
+        color: '#10b981',
+        type: 'expense' as 'income' | 'expense',
+        icon: 'tag'
+    });
+
+    // Delete Confirmation State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Validation State
+    const [validationError, setValidationError] = useState('');
+
     useEffect(() => {
         if (activeSection === 'Contas Bancárias') fetchAccounts();
         if (activeSection === 'Categorias') fetchCategories();
@@ -52,6 +71,178 @@ export default function Settings() {
     const fetchCategories = async () => {
         const { data } = await supabase.from('categories').select('*').order('name');
         setCategories(data || []);
+    };
+
+    const handleSaveCategory = async () => {
+        // Clear previous validation errors
+        setValidationError('');
+
+        if (!user) {
+            setValidationError('Usuário não autenticado');
+            return;
+        }
+
+        // Validate required fields
+        if (!categoryForm.name.trim()) {
+            setValidationError('O nome da categoria é obrigatório');
+            return;
+        }
+
+        if (!categoryForm.type) {
+            setValidationError('O tipo da categoria é obrigatório');
+            return;
+        }
+
+        if (!categoryForm.color) {
+            setValidationError('A cor da categoria é obrigatória');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Check for duplicate category name (case-insensitive)
+            // Filter by user_id if column exists, otherwise global? 
+            // Assuming categories are per-user based on request
+            const query = supabase
+                .from('categories')
+                .select('id, name')
+                .ilike('name', categoryForm.name.trim());
+
+            // If we assume user_id exists, we should filter by it too?
+            // But let's stick to name check for now, Supabase RLS handles visibility
+
+            const { data: existingCategories, error: duplicateError } = await query;
+
+            if (duplicateError) throw duplicateError;
+
+            // If editing, exclude the current category from duplicate check
+            const duplicates = editingCategory
+                ? existingCategories?.filter(cat => cat.id !== editingCategory.id)
+                : existingCategories;
+
+            if (duplicates && duplicates.length > 0) {
+                setValidationError('Já existe uma categoria com esse nome');
+                setLoading(false);
+                return;
+            }
+
+            const categoryData = {
+                name: categoryForm.name.trim(),
+                color: categoryForm.color,
+                type: categoryForm.type,
+                icon: categoryForm.icon || 'tag', // Ensure icon has a value
+                user_id: user.id // Now we assume the schema will be fixed
+            };
+
+            let res;
+            if (editingCategory) {
+                // Remove user_id from update payload just in case (usually immutable)
+                const { user_id, ...updateData } = categoryData;
+                res = await supabase
+                    .from('categories')
+                    .update(updateData)
+                    .eq('id', editingCategory.id);
+            } else {
+                res = await supabase
+                    .from('categories')
+                    .insert([categoryData]);
+            }
+
+            if (res.error) {
+                console.error('Supabase Error details:', res.error);
+                throw res.error;
+            }
+
+            showToast(`Categoria ${editingCategory ? 'atualizada' : 'criada'} com sucesso!`);
+            fetchCategories();
+            setIsCategoryModalOpen(false);
+
+            // Reset form after successful save
+            setCategoryForm({
+                name: '',
+                color: '#10b981',
+                type: 'expense',
+                icon: 'tag'
+            });
+            setEditingCategory(null);
+        } catch (err: any) {
+            console.error('Error saving category:', err);
+            // Show more specific error if available
+            setValidationError(err.message || 'Erro ao salvar categoria');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const openDeleteModal = (category: any) => {
+        setCategoryToDelete(category);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteCategory = async () => {
+        if (!categoryToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            // First, check if there are any transactions linked to this category
+            const { count, error: countError } = await supabase
+                .from('transactions')
+                .select('*', { count: 'exact', head: true })
+                .eq('category_id', categoryToDelete.id);
+
+            if (countError) throw countError;
+
+            // If there are linked transactions, prevent deletion
+            if (count && count > 0) {
+                showToast(
+                    `Não é possível excluir esta categoria. Existem ${count} transação(ões) vinculada(s). Reatribua ou exclua essas transações primeiro.`,
+                    'error'
+                );
+                setIsDeleteModalOpen(false);
+                setIsDeleting(false);
+                return;
+            }
+
+            // No linked transactions, proceed with deletion
+            const { error } = await supabase
+                .from('categories')
+                .delete()
+                .eq('id', categoryToDelete.id);
+
+            if (error) throw error;
+
+            showToast('Categoria excluída com sucesso!');
+            fetchCategories();
+            setIsDeleteModalOpen(false);
+        } catch (err) {
+            console.error('Error deleting category:', err);
+            showToast('Erro ao excluir categoria.', 'error');
+        } finally {
+            setIsDeleting(false);
+            setCategoryToDelete(null);
+        }
+    };
+
+    const openCategoryModal = (cat?: any) => {
+        setValidationError(''); // Clear any previous errors
+        if (cat) {
+            setEditingCategory(cat);
+            setCategoryForm({
+                name: cat.name,
+                color: cat.color || '#10b981',
+                type: cat.type || 'expense',
+                icon: cat.icon || 'tag'
+            });
+        } else {
+            setEditingCategory(null);
+            setCategoryForm({
+                name: '',
+                color: '#10b981',
+                type: 'expense',
+                icon: 'tag'
+            });
+        }
+        setIsCategoryModalOpen(true);
     };
 
     const handleSaveProfile = async () => {
@@ -168,41 +359,215 @@ export default function Settings() {
                 const expenseCats = categories.filter(c => c.type === 'expense');
                 return (
                     <div className="settings-section">
-                        <h2 className="settings-section-title">Gestão de Categorias</h2>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="settings-section-title" style={{ margin: 0 }}>Gestão de Categorias</h2>
+                            <button className="btn-add-minimal" onClick={() => openCategoryModal()}>
+                                <Plus size={18} /> Nova Categoria
+                            </button>
+                        </div>
 
                         <h4 className="transfer-label" style={{ marginTop: '1.5rem', color: '#10b981' }}>Receitas</h4>
                         <div className="settings-list" style={{ marginBottom: '2.5rem' }}>
-                            {incomeCats.map(cat => (
-                                <div key={cat.id} className="settings-list-item">
-                                    <div className="item-main-info">
-                                        <span className="item-name">{cat.name}</span>
+                            {incomeCats.length === 0 ? (
+                                <p className="text-sm text-gray-500 italic p-4 text-center">Nenhuma categoria de receita.</p>
+                            ) : (
+                                incomeCats.map(cat => (
+                                    <div key={cat.id} className="settings-list-item">
+                                        <div className="item-main-info flex items-center gap-3">
+                                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }}></div>
+                                            <span className="item-name">{cat.name}</span>
+                                        </div>
+                                        <div className="item-actions-minimal">
+                                            <button className="btn-action-minimal" onClick={() => openCategoryModal(cat)}><Edit2 size={16} /></button>
+                                            <button className="btn-action-minimal danger" onClick={() => openDeleteModal(cat)}><Trash2 size={16} /></button>
+                                        </div>
                                     </div>
-                                    <div className="item-actions-minimal">
-                                        <button className="btn-action-minimal"><Edit2 size={16} /></button>
-                                        <button className="btn-action-minimal danger"><Trash2 size={16} /></button>
-                                    </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
 
                         <h4 className="transfer-label" style={{ color: '#ef4444' }}>Despesas</h4>
                         <div className="settings-list">
-                            {expenseCats.map(cat => (
-                                <div key={cat.id} className="settings-list-item">
-                                    <div className="item-main-info">
-                                        <span className="item-name">{cat.name}</span>
+                            {expenseCats.length === 0 ? (
+                                <p className="text-sm text-gray-500 italic p-4 text-center">Nenhuma categoria de despesa.</p>
+                            ) : (
+                                expenseCats.map(cat => (
+                                    <div key={cat.id} className="settings-list-item">
+                                        <div className="item-main-info flex items-center gap-3">
+                                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }}></div>
+                                            <span className="item-name">{cat.name}</span>
+                                        </div>
+                                        <div className="item-actions-minimal">
+                                            <button className="btn-action-minimal" onClick={() => openCategoryModal(cat)}><Edit2 size={16} /></button>
+                                            <button className="btn-action-minimal danger" onClick={() => openDeleteModal(cat)}><Trash2 size={16} /></button>
+                                        </div>
                                     </div>
-                                    <div className="item-actions-minimal">
-                                        <button className="btn-action-minimal"><Edit2 size={16} /></button>
-                                        <button className="btn-action-minimal danger"><Trash2 size={16} /></button>
-                                    </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
 
-                        <button className="btn-add-minimal" style={{ marginTop: '1rem' }}>
-                            <Plus size={18} /> Nova Categoria
-                        </button>
+                        {/* Category Modal */}
+                        {isCategoryModalOpen && (
+                            <div
+                                className="modal-overlay category-modal-overlay"
+                                onClick={() => setIsCategoryModalOpen(false)}
+                            >
+                                <div
+                                    className="modal-content category-modal-content"
+                                    onClick={e => e.stopPropagation()}
+                                    style={{ maxWidth: '420px', width: '95%' }}
+                                >
+                                    <div className="modal-header">
+                                        <h3>{editingCategory ? 'Editar Categoria' : 'Nova Categoria'}</h3>
+                                        <button
+                                            className="btn-close"
+                                            onClick={() => setIsCategoryModalOpen(false)}
+                                            disabled={loading}
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                    <div className="category-modal-body">
+                                        {/* Validation Error Message */}
+                                        {validationError && (
+                                            <div className="validation-error-message">
+                                                {validationError}
+                                            </div>
+                                        )}
+
+                                        <div className="category-form-field">
+                                            <label className="category-label">NOME</label>
+                                            <input
+                                                type="text"
+                                                className="category-input"
+                                                placeholder="Ex: Alimentação"
+                                                value={categoryForm.name}
+                                                onChange={e => {
+                                                    setCategoryForm({ ...categoryForm, name: e.target.value });
+                                                    setValidationError(''); // Clear error on input
+                                                }}
+                                                disabled={loading}
+                                                autoFocus
+                                            />
+                                        </div>
+
+                                        <div className="category-form-field">
+                                            <label className="category-label">TIPO</label>
+                                            <select
+                                                className="category-select"
+                                                value={categoryForm.type}
+                                                onChange={e => {
+                                                    setCategoryForm({ ...categoryForm, type: e.target.value as any });
+                                                    setValidationError('');
+                                                }}
+                                                disabled={loading}
+                                            >
+                                                <option value="expense">Despesa</option>
+                                                <option value="income">Receita</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="category-form-field">
+                                            <label className="category-label">COR</label>
+                                            <div className="category-color-picker">
+                                                <input
+                                                    type="color"
+                                                    value={categoryForm.color}
+                                                    onChange={e => {
+                                                        setCategoryForm({ ...categoryForm, color: e.target.value });
+                                                        setValidationError('');
+                                                    }}
+                                                    className="category-color-input"
+                                                    disabled={loading}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    className="category-input category-color-text"
+                                                    value={categoryForm.color}
+                                                    onChange={e => {
+                                                        setCategoryForm({ ...categoryForm, color: e.target.value });
+                                                        setValidationError('');
+                                                    }}
+                                                    disabled={loading}
+                                                    placeholder="#10b981"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            className="btn-save-category"
+                                            onClick={handleSaveCategory}
+                                            disabled={loading}
+                                        >
+                                            {loading ? 'Salvando...' : 'Salvar Categoria'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Delete Confirmation Modal */}
+                        {isDeleteModalOpen && categoryToDelete && (
+                            <div className="modal-overlay" onClick={() => !isDeleting && setIsDeleteModalOpen(false)}>
+                                <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+                                    <div className="modal-header">
+                                        <h3>Confirmar Exclusão</h3>
+                                        <button
+                                            className="btn-close"
+                                            onClick={() => setIsDeleteModalOpen(false)}
+                                            disabled={isDeleting}
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                    <div className="p-6">
+                                        <div className="mb-6">
+                                            <p className="text-base mb-3" style={{ color: 'var(--text-main)' }}>
+                                                Tem certeza que deseja excluir a categoria:
+                                            </p>
+                                            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--bg-tertiary)' }}>
+                                                <div
+                                                    className="w-4 h-4 rounded-full"
+                                                    style={{ backgroundColor: categoryToDelete.color }}
+                                                />
+                                                <span className="font-semibold" style={{ color: 'var(--text-main)' }}>
+                                                    {categoryToDelete.name}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm mt-4" style={{ color: 'var(--text-muted)' }}>
+                                                Esta ação não poderá ser desfeita. A categoria será excluída permanentemente.
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <button
+                                                className="btn-settings-save"
+                                                onClick={() => setIsDeleteModalOpen(false)}
+                                                disabled={isDeleting}
+                                                style={{
+                                                    flex: 1,
+                                                    background: 'var(--bg-tertiary)',
+                                                    color: 'var(--text-main)'
+                                                }}
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                className="btn-settings-save"
+                                                onClick={handleDeleteCategory}
+                                                disabled={isDeleting}
+                                                style={{
+                                                    flex: 1,
+                                                    background: '#ef4444',
+                                                    color: 'white'
+                                                }}
+                                            >
+                                                {isDeleting ? 'Excluindo...' : 'Excluir'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
 
