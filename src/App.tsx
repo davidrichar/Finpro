@@ -31,10 +31,10 @@ const ProtectedRoute = ({ children, showLayout = true }: { children: ReactNode, 
 
 function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <ToastProvider>
-          <Router>
+    <Router>
+      <AuthProvider>
+        <ThemeProvider>
+          <ToastProvider>
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route
@@ -94,10 +94,10 @@ function App() {
                 }
               />
             </Routes>
-          </Router>
-        </ToastProvider>
-      </ThemeProvider>
-    </AuthProvider>
+          </ToastProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

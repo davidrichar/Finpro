@@ -1,5 +1,6 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { type AuthError, type Session, type User, type AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -53,8 +54,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error };
     };
 
+    const navigate = useNavigate();
+
     const signOut = async () => {
+        // Clear local storage and tokens
+        localStorage.clear();
+        sessionStorage.clear();
+
         const { error } = await supabase.auth.signOut();
+
+        // Redirect to login
+        navigate('/login', { replace: true });
+
         return { error };
     };
 
