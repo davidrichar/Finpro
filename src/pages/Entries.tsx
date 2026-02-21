@@ -24,6 +24,7 @@ interface Transaction {
 
 type FilterType = 'all' | 'income' | 'expense';
 type PeriodType = 'day' | 'month' | 'year';
+type StatusFilter = 'all' | 'pending' | 'paid' | 'overdue';
 
 export default function Entries() {
     const { user } = useAuth();
@@ -36,6 +37,38 @@ export default function Entries() {
     const [modalType, setModalType] = useState<'receivable' | 'payable'>('receivable');
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const [filterType] = useState<FilterType>('all');
+
+    // Advanced Filter State
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategoryId, setSelectedCategoryId] = useState('');
+    const [selectedAccountId, setSelectedAccountId] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all');
+    const [dateRange, setDateRange] = useState({
+        start: new Date().toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+    });
+
+    // Data for filters
+    const [categories, setCategories] = useState<any[]>([]);
+    const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+
+    const fetchFilterData = useCallback(async () => {
+        try {
+            const [catRes, accRes] = await Promise.all([
+                supabase.from('categories').select('*').order('name'),
+                supabase.from('bank_accounts').select('*').order('name')
+            ]);
+            setCategories(catRes.data || []);
+            setBankAccounts(accRes.data || []);
+        } catch (err) {
+            console.error('Error fetching filter data:', err);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchFilterData();
+    }, [fetchFilterData]);
 
 
     const fetchTransactions = useCallback(async () => {
@@ -59,21 +92,45 @@ export default function Entries() {
                 query = query.eq('type', filterType);
             }
 
-            // Filter out paid transactions - they "não contabilizam" in the entries list
-            query = query.neq('status', 'paid');
+            // Filter out paid transactions - ONLY if not specifically filtering for them
+            if (selectedStatus === 'all' || selectedStatus === 'pending') {
+                query = query.neq('status', 'paid');
+            } else if (selectedStatus === 'paid') {
+                query = query.eq('status', 'paid');
+            }
+
+            // Advanced Filters
+            if (searchQuery) {
+                query = query.ilike('description', `%${searchQuery}%`);
+            }
+            if (selectedCategoryId) {
+                query = query.eq('category_id', selectedCategoryId);
+            }
+            if (selectedAccountId) {
+                query = query.eq('account_id', selectedAccountId);
+            }
+            if (selectedStatus === 'overdue') {
+                query = query.eq('status', 'pending').lt('date', new Date().toISOString().split('T')[0]);
+            }
 
             // Apply date filter based on period
             const date = new Date(selectedDate);
-            if (periodType === 'day') {
-                query = query.eq('date', selectedDate);
-            } else if (periodType === 'month') {
-                const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
-                const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
-                query = query.gte('date', startOfMonth).lte('date', endOfMonth);
-            } else if (periodType === 'year') {
-                const startOfYear = new Date(date.getFullYear(), 0, 1).toISOString().split('T')[0];
-                const endOfYear = new Date(date.getFullYear(), 11, 31).toISOString().split('T')[0];
-                query = query.gte('date', startOfYear).lte('date', endOfYear);
+            if (showAdvancedFilters) {
+                // In advanced mode, we always use the custom date range
+                query = query.gte('date', dateRange.start).lte('date', dateRange.end);
+            } else {
+                // In normal mode, use the quick period filters
+                if (periodType === 'day') {
+                    query = query.eq('date', selectedDate);
+                } else if (periodType === 'month') {
+                    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+                    const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
+                    query = query.gte('date', startOfMonth).lte('date', endOfMonth);
+                } else if (periodType === 'year') {
+                    const startOfYear = new Date(date.getFullYear(), 0, 1).toISOString().split('T')[0];
+                    const endOfYear = new Date(date.getFullYear(), 11, 31).toISOString().split('T')[0];
+                    query = query.gte('date', startOfYear).lte('date', endOfYear);
+                }
             }
 
             const { data, error } = await query.order('date', { ascending: false });
@@ -92,7 +149,7 @@ export default function Entries() {
         } finally {
             setLoading(false);
         }
-    }, [user, filterType, periodType, selectedDate]);
+    }, [user, filterType, periodType, selectedDate, searchQuery, selectedCategoryId, selectedAccountId, selectedStatus, dateRange, showAdvancedFilters]);
 
     useEffect(() => {
         fetchTransactions();
@@ -283,16 +340,119 @@ export default function Entries() {
                         Ano
                     </button>
                 </div>
-                <div className="date-picker-wrapper">
-                    <Calendar size={18} />
-                    <input
-                        type="date"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        className="date-picker-input"
-                    />
+                <div className="flex items-center gap-4">
+                    <button
+                        className={`btn-advanced-filters ${showAdvancedFilters ? 'active' : ''}`}
+                        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                    >
+                        Filtros Avançados
+                    </button>
+                    {!showAdvancedFilters && (
+                        <div className="date-picker-wrapper">
+                            <Calendar size={18} />
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className="date-picker-input"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
+
+            {/* Advanced Filters Panel */}
+            {showAdvancedFilters && (
+                <div className="advanced-filters-panel">
+                    <div className="filters-grid">
+                        <div className="filter-group">
+                            <label>Buscar</label>
+                            <input
+                                type="text"
+                                placeholder="Descrição..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="filter-input"
+                            />
+                        </div>
+                        <div className="filter-group">
+                            <label>Categoria</label>
+                            <select
+                                value={selectedCategoryId}
+                                onChange={(e) => setSelectedCategoryId(e.target.value)}
+                                className="filter-select"
+                            >
+                                <option value="">Todas</option>
+                                {categories.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="filter-group">
+                            <label>Conta</label>
+                            <select
+                                value={selectedAccountId}
+                                onChange={(e) => setSelectedAccountId(e.target.value)}
+                                className="filter-select"
+                            >
+                                <option value="">Todas</option>
+                                {bankAccounts.map(acc => (
+                                    <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="filter-group">
+                            <label>Status</label>
+                            <select
+                                value={selectedStatus}
+                                onChange={(e) => setSelectedStatus(e.target.value as StatusFilter)}
+                                className="filter-select"
+                            >
+                                <option value="all">Pendente/Atrasado</option>
+                                <option value="pending">Pendente</option>
+                                <option value="paid">Pago</option>
+                                <option value="overdue">Atrasado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="custom-date-range">
+                        <div className="filter-group">
+                            <label>Início</label>
+                            <input
+                                type="date"
+                                value={dateRange.start}
+                                onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                                className="filter-input"
+                            />
+                        </div>
+                        <div className="filter-group">
+                            <label>Fim</label>
+                            <input
+                                type="date"
+                                value={dateRange.end}
+                                onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                                className="filter-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end mt-4">
+                        <button
+                            className="btn-clear-filters"
+                            onClick={() => {
+                                setSearchQuery('');
+                                setSelectedCategoryId('');
+                                setSelectedAccountId('');
+                                setSelectedStatus('all');
+                                setPeriodType('month');
+                            }}
+                        >
+                            Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Transactions List */}
             <div className="transactions-list-card">
