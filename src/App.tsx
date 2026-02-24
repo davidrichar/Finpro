@@ -7,6 +7,7 @@ import Transfers from './pages/Transfers';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
 import PrintReport from './pages/PrintReport';
+import Agenda from './pages/Agenda';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { type ReactNode } from 'react';
 import Layout from './components/Layout';
@@ -66,6 +67,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Transfers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agenda"
+                element={
+                  <ProtectedRoute>
+                    <Agenda />
                   </ProtectedRoute>
                 }
               />

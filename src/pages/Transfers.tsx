@@ -120,22 +120,6 @@ export default function Transfers() {
 
             if (inError) throw inError;
 
-            // 3. Update Origin Balance
-            const { error: updOriginError } = await supabase
-                .from('bank_accounts')
-                .update({ balance: originAccount!.balance - value })
-                .eq('id', originId);
-
-            if (updOriginError) throw updOriginError;
-
-            // 4. Update Destination Balance
-            const { error: updDestError } = await supabase
-                .from('bank_accounts')
-                .update({ balance: destinationAccount!.balance + value })
-                .eq('id', destinationId);
-
-            if (updDestError) throw updDestError;
-
             showToast('Transferência realizada com sucesso!', 'success');
 
             // Reset form

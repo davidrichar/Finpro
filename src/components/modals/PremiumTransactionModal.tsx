@@ -235,14 +235,7 @@ export default function PremiumTransactionModal({ isOpen, onClose, onSuccess, ty
             handleClose();
         } catch (err: any) {
             console.error('Error saving transaction:', err);
-            // If the error is about a missing column, explain to the user
-            if (err.message?.includes('contabilizado')) {
-                showToast('A coluna "contabilizado" não existe. Salvo sem atualização de saldo.', 'info');
-                onSuccess();
-                handleClose();
-            } else {
-                showToast('Erro ao salvar transação: ' + (err.message || 'Verifique o console.'), 'error');
-            }
+            showToast('Erro ao salvar transação: ' + (err.message || 'Verifique o console.'), 'error');
         } finally {
             setLoading(false);
         }
@@ -277,14 +270,7 @@ export default function PremiumTransactionModal({ isOpen, onClose, onSuccess, ty
             onSuccess();
             handleClose();
         } catch (err: any) {
-            console.error('Error saving transaction:', err);
-            if (err.message?.includes('contabilizado')) {
-                showToast('A coluna "contabilizado" não existe. Salvo sem atualização de saldo.', 'info');
-                onSuccess();
-                handleClose();
-            } else {
-                showToast('Erro ao salvar transação: ' + (err.message || 'Verifique o console.'), 'error');
-            }
+            showToast('Erro ao salvar transação: ' + (err.message || 'Verifique o console.'), 'error');
         } finally {
             setLoading(false);
         }

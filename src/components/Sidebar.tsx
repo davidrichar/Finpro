@@ -9,12 +9,14 @@ import {
   X,
   Wallet,
   FileText,
-  PlusCircle
+  PlusCircle,
+  Calendar
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const menuItems = [
   { path: '/entries', name: 'Lançamento', icon: PlusCircle },
+  { path: '/agenda', name: 'Agenda', icon: Calendar },
   { path: '/accounts', name: 'Contas Bancárias', icon: Wallet },
   { path: '/reports', name: 'Relatórios', icon: FileText },
   { path: '/transfers', name: 'Transferências', icon: Repeat },

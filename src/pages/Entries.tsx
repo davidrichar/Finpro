@@ -45,8 +45,8 @@ export default function Entries() {
     const [selectedAccountId, setSelectedAccountId] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all');
     const [dateRange, setDateRange] = useState({
-        start: new Date().toISOString().split('T')[0],
-        end: new Date().toISOString().split('T')[0]
+        start: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+        end: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
     });
 
     // Data for filters
@@ -92,12 +92,15 @@ export default function Entries() {
                 query = query.eq('type', filterType);
             }
 
-            // Filter out paid transactions - ONLY if not specifically filtering for them
-            if (selectedStatus === 'all' || selectedStatus === 'pending') {
-                query = query.neq('status', 'paid');
+            // Improved status filter logic
+            if (selectedStatus === 'pending') {
+                query = query.eq('status', 'pending');
             } else if (selectedStatus === 'paid') {
                 query = query.eq('status', 'paid');
+            } else if (selectedStatus === 'overdue') {
+                query = query.eq('status', 'pending').lt('date', new Date().toISOString().split('T')[0]);
             }
+            // If selectedStatus is 'all', we don't add any filter (shows BOTH paid and pending)
 
             // Advanced Filters
             if (searchQuery) {
@@ -108,9 +111,6 @@ export default function Entries() {
             }
             if (selectedAccountId) {
                 query = query.eq('account_id', selectedAccountId);
-            }
-            if (selectedStatus === 'overdue') {
-                query = query.eq('status', 'pending').lt('date', new Date().toISOString().split('T')[0]);
             }
 
             // Apply date filter based on period
@@ -154,6 +154,25 @@ export default function Entries() {
     useEffect(() => {
         fetchTransactions();
     }, [fetchTransactions]);
+
+    // Sync dateRange with period filters when advanced filters are NOT shown
+    useEffect(() => {
+        if (!showAdvancedFilters) {
+            const date = new Date(selectedDate);
+            let start = selectedDate;
+            let end = selectedDate;
+
+            if (periodType === 'month') {
+                start = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+                end = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
+            } else if (periodType === 'year') {
+                start = new Date(date.getFullYear(), 0, 1).toISOString().split('T')[0];
+                end = new Date(date.getFullYear(), 11, 31).toISOString().split('T')[0];
+            }
+
+            setDateRange({ start, end });
+        }
+    }, [periodType, selectedDate, showAdvancedFilters]);
 
     // Calculate totals of current filtered transactions (Excludes paid items as per current query)
     const totalReceivable = transactions
@@ -235,28 +254,13 @@ export default function Entries() {
             const { error } = await supabase
                 .from('transactions')
                 .update({
-                    status: 'paid',
-                    contabilizado: true
+                    status: 'paid'
                 })
                 .eq('id', transaction.id);
 
-            if (error) {
-                // Handle missing column error gracefully (checks for PG code 42703 or PostgREST schema cache error)
-                if (error.message?.includes('contabilizado')) {
-                    const { error: retryError } = await supabase
-                        .from('transactions')
-                        .update({ status: 'paid' })
-                        .eq('id', transaction.id);
+            if (error) throw error;
 
-                    if (retryError) throw retryError;
-                    showToast('Pago com sucesso! (Aviso: Execute a migração SQL para atualizar saldos automaticamente)');
-                } else {
-                    throw error;
-                }
-            } else {
-                showToast(transaction.type === 'income' ? 'Recebido com sucesso!' : 'Pago com sucesso!');
-            }
-
+            showToast(transaction.type === 'income' ? 'Recebido com sucesso!' : 'Pago com sucesso!');
             fetchTransactions();
         } catch (err: any) {
             console.error('Error updating transaction:', err);
@@ -408,10 +412,10 @@ export default function Entries() {
                                 onChange={(e) => setSelectedStatus(e.target.value as StatusFilter)}
                                 className="filter-select"
                             >
-                                <option value="all">Pendente/Atrasado</option>
-                                <option value="pending">Pendente</option>
-                                <option value="paid">Pago</option>
-                                <option value="overdue">Atrasado</option>
+                                <option value="all">Todos (Pagos e Pendentes)</option>
+                                <option value="pending">Apenas Pendentes</option>
+                                <option value="paid">Apenas Pagos</option>
+                                <option value="overdue">Apenas Atrasados</option>
                             </select>
                         </div>
                     </div>

@@ -174,28 +174,7 @@ export default function Accounts() {
         if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
 
         try {
-            // If the transaction is paid, we need to revert the balance
-            if (transaction.status === 'paid' && transaction.account_id) {
-                const { data: account, error: accError } = await supabase
-                    .from('bank_accounts')
-                    .select('balance')
-                    .eq('id', transaction.account_id)
-                    .single();
-
-                if (accError) throw accError;
-
-                const newBalance = transaction.type === 'income'
-                    ? Number(account.balance) - Number(transaction.amount)
-                    : Number(account.balance) + Number(transaction.amount);
-
-                const { error: updateError } = await supabase
-                    .from('bank_accounts')
-                    .update({ balance: newBalance })
-                    .eq('id', transaction.account_id);
-
-                if (updateError) throw updateError;
-            }
-
+            // O saldo agora é atualizado automaticamente via trigger no banco de dados (trigger_update_account_balance_delete)
             const { error: delError } = await supabase
                 .from('transactions')
                 .delete()
