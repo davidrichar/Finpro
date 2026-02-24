@@ -23,7 +23,7 @@ import { useTheme } from '../contexts/ThemeContext';
 type Section = 'Perfil' | 'Contas Bancárias' | 'Categorias' | 'Notificações' | 'Segurança' | 'Aparência' | 'Preferências do Sistema';
 
 export default function Settings() {
-    const { user, signOut } = useAuth();
+    const { user } = useAuth();
     const { showToast } = useToast();
     const { theme, setTheme } = useTheme();
     const [activeSection, setActiveSection] = useState<Section>('Perfil');
